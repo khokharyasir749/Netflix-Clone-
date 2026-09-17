@@ -91,7 +91,7 @@ export default function MyList() {
                       </button>
                     </div>
                     <p className="text-[10px] text-gray-400 mt-0.5">
-                      {item.duration || item.rating || '98% Match'}
+                      {item.duration || item.rating || ''}
                     </p>
                   </div>
                 </div>

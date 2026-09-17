@@ -163,9 +163,6 @@ export default function MovieCard({ movie, isLargeRow = false }) {
 
             {/* Metadata Row */}
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold mt-1">
-              <span className="text-[#46d369]">
-                {movie.matchRate || 98}% Match
-              </span>
               <span className="border border-gray-500 text-gray-300 px-1 py-0.1 rounded text-[9px]">
                 {movie.rating || '16+'}
               </span>

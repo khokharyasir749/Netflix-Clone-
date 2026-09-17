@@ -80,9 +80,6 @@ export default function Banner() {
 
         {/* Metadata Badges */}
         <div className="flex items-center gap-3 text-xs md:text-sm font-semibold text-gray-300">
-          <span className="text-[#46d369] font-bold">
-            {movie.matchRate || 98}% Match
-          </span>
           <span>{releaseYear}</span>
           <span className="border border-gray-500/80 px-1.5 py-0.2 rounded text-[11px] text-gray-200">
             {movie.rating || 'TV-MA'}

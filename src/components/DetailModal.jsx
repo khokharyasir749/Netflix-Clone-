@@ -176,9 +176,6 @@ export default function DetailModal() {
             {/* Left 2 Cols: Details & Overview */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold text-gray-300">
-                <span className="text-[#46d369] font-bold">
-                  {movie.matchRate || 98}% Match
-                </span>
                 <span>{releaseYear}</span>
                 <span className="border border-gray-500/80 px-1.5 py-0.5 rounded text-[11px] text-gray-200 font-bold">
                   {movie.rating || '16+'}
@@ -249,9 +246,8 @@ export default function DetailModal() {
 
                     <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[11px] text-[#46d369] font-bold">
-                          <span>{item.matchRate || 95}% Match</span>
-                          <span className="border border-gray-600 text-gray-300 px-1 rounded text-[9px]">
+                        <div className="flex items-center gap-2 text-[11px] text-gray-300 font-bold">
+                          <span className="border border-gray-600 px-1 rounded text-[9px]">
                             {item.rating || '16+'}
                           </span>
                         </div>
