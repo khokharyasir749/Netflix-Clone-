@@ -137,12 +137,7 @@ export default function Banner() {
         </div>
       </div>
 
-      {/* Right Edge: Maturity Rating Badge (Speaker/mute button removed) */}
-      <div className="absolute right-0 bottom-24 md:bottom-32 z-20 flex items-center">
-        <div className="bg-black/50 border-l-4 border-gray-400 text-gray-200 font-bold text-xs sm:text-sm py-1 px-3 sm:px-4 backdrop-blur-xs select-none">
-          {movie.rating || 'TV-MA'}
-        </div>
-      </div>
+
     </div>
   );
 }
