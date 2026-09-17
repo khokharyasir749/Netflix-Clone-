@@ -4,6 +4,7 @@ import { getImageUrl, DEFAULT_FALLBACK_IMAGE } from '../services/api';
 import { useMovieContext } from '../context/MovieContext';
 
 export default function MovieCard({ movie, isLargeRow = false }) {
+  const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const {
     isInWatchlist,
@@ -17,7 +18,6 @@ export default function MovieCard({ movie, isLargeRow = false }) {
 
   const inList = isInWatchlist(movie.id);
   const title = movie.title || movie.name;
-  const releaseYear = (movie.first_air_date || movie.release_date || '2023').substring(0, 4);
 
   // Use poster for large rows (Netflix Originals), backdrop for standard rows
   const imagePath = isLargeRow
@@ -33,19 +33,24 @@ export default function MovieCard({ movie, isLargeRow = false }) {
 
   return (
     <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={() => openDetailModal(movie)}
-      className={`group relative shrink-0 flex flex-col transition-all duration-300 ease-out cursor-pointer select-none ${
+      className={`relative shrink-0 select-none cursor-pointer transition-all duration-300 ${
         isLargeRow
           ? 'w-[140px] sm:w-[170px] md:w-[200px]'
           : 'w-[200px] sm:w-[250px] md:w-[280px]'
-      }`}
+      } ${isHovered ? 'z-50' : 'z-10'}`}
     >
-      {/* Poster / Backdrop Image Container with Hover Scaling */}
+      {/* Floating Card: Scales strictly for the individually hovered card */}
       <div
-        className={`relative w-full rounded-md overflow-hidden bg-[#181818] shadow-md border border-white/5 transition-all duration-300 ease-out group-hover:scale-105 md:group-hover:scale-110 group-hover:z-30 group-hover:shadow-2xl group-hover:border-white/20 ${
-          isLargeRow ? 'aspect-[2/3]' : 'aspect-[16/9]'
-        }`}
+        className={`relative w-full rounded-md overflow-hidden bg-[#181818] transition-all duration-300 ease-out origin-center ${
+          isHovered
+            ? 'scale-125 z-50 shadow-2xl ring-1 ring-white/20'
+            : 'scale-100 shadow-md border-0'
+        } ${isLargeRow ? 'aspect-[2/3]' : 'aspect-[16/9]'}`}
       >
+        {/* Default Clean Movie Thumbnail (No clutter underneath) */}
         <img
           src={imageUrl}
           alt={title}
@@ -53,21 +58,27 @@ export default function MovieCard({ movie, isLargeRow = false }) {
             e.target.onerror = null;
             e.target.src = DEFAULT_FALLBACK_IMAGE;
           }}
-          className="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300"
+          className={`w-full h-full object-cover transition-all duration-300 ${
+            isHovered ? 'brightness-105' : 'brightness-100'
+          }`}
           loading="lazy"
         />
 
-        {/* Brand Tag on Non-Hover for Originals */}
-        {movie.isOriginal && !isLargeRow && (
+        {/* Netflix Brand 'N' Mark on Non-Hover for Originals */}
+        {movie.isOriginal && !isLargeRow && !isHovered && (
           <span className="absolute top-2 left-2 bg-[#E50914] text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow">
             N
           </span>
         )}
 
-        {/* On-Hover Mini-Card Detail Overlay */}
-        <div className="absolute inset-0 bg-[#181818] rounded-md shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto flex flex-col justify-between p-3 border border-white/20">
-          {/* Top thumbnail representation */}
-          <div className="relative w-full h-[55%] rounded overflow-hidden">
+        {/* Floating Hover Card Detail Overlay */}
+        <div
+          className={`absolute inset-0 bg-[#181818] rounded-md shadow-2xl transition-opacity duration-300 flex flex-col justify-between p-2.5 sm:p-3 border border-white/20 ${
+            isHovered ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          {/* Top thumbnail representation with dynamic title */}
+          <div className="relative w-full h-[54%] rounded overflow-hidden">
             <img
               src={imageUrl}
               alt={title}
@@ -78,13 +89,13 @@ export default function MovieCard({ movie, isLargeRow = false }) {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
-            <span className="absolute bottom-1 left-1.5 text-[11px] font-bold text-white drop-shadow truncate max-w-[90%]">
+            <span className="absolute bottom-1 left-1.5 right-1.5 text-[11px] sm:text-xs font-bold text-white drop-shadow truncate">
               {title}
             </span>
           </div>
 
           {/* Bottom Details Section */}
-          <div className="flex-1 flex flex-col justify-between pt-1.5">
+          <div className="flex-1 flex flex-col justify-between pt-1">
             {/* Quick Action Buttons */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -159,7 +170,7 @@ export default function MovieCard({ movie, isLargeRow = false }) {
                 {movie.rating || '16+'}
               </span>
               <span className="text-gray-300">
-                {movie.duration || 'TV Series'}
+                {movie.duration || (movie.media_type === 'tv' ? 'TV Series' : 'Movie')}
               </span>
               <span className="border border-gray-500 text-gray-300 px-1 rounded text-[8px]">
                 HD
@@ -176,28 +187,6 @@ export default function MovieCard({ movie, isLargeRow = false }) {
               ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Always Visible Movie Name & Info Below Every Card */}
-      <div className="px-0.5">
-        <p className="mt-2 text-sm font-semibold text-white truncate">
-          {movie.title || movie.name}
-        </p>
-        <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-          <span className="text-green-400 font-medium">
-            {movie.matchRate || 98}% Match
-          </span>
-          <span>•</span>
-          <span>{releaseYear}</span>
-          {movie.rating && (
-            <>
-              <span>•</span>
-              <span className="border border-gray-600 px-1 py-0.1 rounded text-[10px] text-gray-300">
-                {movie.rating}
-              </span>
-            </>
-          )}
         </div>
       </div>
     </div>

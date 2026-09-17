@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Info, Volume2, VolumeX, Check, Plus } from 'lucide-react';
+import { Play, Info, Check, Plus } from 'lucide-react';
 import { fetchMovies, getImageUrl } from '../services/api';
 import { useMovieContext } from '../context/MovieContext';
 
@@ -8,7 +8,6 @@ const DEFAULT_BANNER_BACKDROP =
 
 export default function Banner() {
   const [movie, setMovie] = useState(null);
-  const [isMuted, setIsMuted] = useState(true);
   const { isInWatchlist, addToWatchlist, removeFromWatchlist, playMovie, openDetailModal } = useMovieContext();
 
   useEffect(() => {
@@ -53,7 +52,7 @@ export default function Banner() {
           className="w-full h-full object-cover object-[center_25%] scale-105 transition-transform duration-1000 ease-out"
         />
 
-        {/* Subtle Multi-Directional Netflix Overlays that do NOT black out the image */}
+        {/* Subtle Multi-Directional Netflix Overlays */}
         {/* Left Vignette for Text Contrast */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/30 to-transparent w-full md:w-3/5 z-1" />
         {/* Top Vignette for Navbar Blending */}
@@ -138,19 +137,8 @@ export default function Banner() {
         </div>
       </div>
 
-      {/* Right Edge: Sound Toggle & Maturity Rating Badge */}
+      {/* Right Edge: Maturity Rating Badge (Speaker/mute button removed) */}
       <div className="absolute right-0 bottom-24 md:bottom-32 z-20 flex items-center">
-        {/* Sound Toggle Button */}
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="w-10 h-10 rounded-full border border-white/40 bg-black/40 hover:bg-black/70 flex items-center justify-center text-white transition-all mr-3 sm:mr-4 backdrop-blur-sm cursor-pointer"
-          title={isMuted ? 'Unmute' : 'Mute'}
-          aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
-        >
-          {isMuted ? <VolumeX className="w-5 h-5 text-gray-200" /> : <Volume2 className="w-5 h-5 text-white" />}
-        </button>
-
-        {/* Maturity Rating Strip */}
         <div className="bg-black/50 border-l-4 border-gray-400 text-gray-200 font-bold text-xs sm:text-sm py-1 px-3 sm:px-4 backdrop-blur-xs select-none">
           {movie.rating || 'TV-MA'}
         </div>

@@ -53,18 +53,18 @@ export default function Row({ title, fetchCategory, isLargeRow = false }) {
   if (!movies || movies.length === 0) return null;
 
   return (
-    <div className="space-y-1 relative group select-none my-4">
-      {/* Row Title & Explore Action */}
-      <div className="px-4 md:px-12 flex items-baseline justify-between">
+    <div className="space-y-1 relative select-none my-4">
+      {/* Row Title & Explore Action (Isolated group/header) */}
+      <div className="px-4 md:px-12 flex items-baseline justify-between group/header">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-wide hover:text-gray-200 transition-colors inline-flex items-center gap-2 cursor-pointer">
           <span>{title}</span>
-          <span className="text-xs font-semibold text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="text-xs font-semibold text-teal-400 opacity-0 group-hover/header:opacity-100 transition-opacity duration-300">
             Explore All &gt;
           </span>
         </h2>
       </div>
 
-      {/* Row Wrapper with Navigation Chevrons */}
+      {/* Row Wrapper with Navigation Chevrons (Isolated group/row) */}
       <div className="relative group/row">
         {/* Left Chevron Button */}
         {canScrollLeft && (
@@ -73,15 +73,15 @@ export default function Row({ title, fetchCategory, isLargeRow = false }) {
             className="absolute left-0 top-0 bottom-0 z-40 w-10 sm:w-12 bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-300 backdrop-blur-xs cursor-pointer shadow-2xl"
             aria-label={`Scroll ${title} left`}
           >
-            <ChevronLeft className="w-8 h-8 transition-transform group-hover:scale-125" />
+            <ChevronLeft className="w-8 h-8 transition-transform group-hover/row:scale-125" />
           </button>
         )}
 
-        {/* Scrollable Movie Container */}
+        {/* Scrollable Movie Container with vertical clearance for scale-125 */}
         <div
           ref={rowRef}
           onScroll={updateScrollButtons}
-          className="flex items-center gap-2 sm:gap-3 px-4 md:px-12 overflow-x-auto overflow-y-visible py-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+          className="flex items-center gap-2 sm:gap-3 px-4 md:px-12 overflow-x-auto overflow-y-visible py-8 -my-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
         >
           {movies.map((movie) => (
             <MovieCard
@@ -99,7 +99,7 @@ export default function Row({ title, fetchCategory, isLargeRow = false }) {
             className="absolute right-0 top-0 bottom-0 z-40 w-10 sm:w-12 bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-300 backdrop-blur-xs cursor-pointer shadow-2xl"
             aria-label={`Scroll ${title} right`}
           >
-            <ChevronRight className="w-8 h-8 transition-transform group-hover:scale-125" />
+            <ChevronRight className="w-8 h-8 transition-transform group-hover/row:scale-125" />
           </button>
         )}
       </div>
