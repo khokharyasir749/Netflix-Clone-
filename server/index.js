@@ -258,50 +258,54 @@ app.get('/api/stream/:id', async (req, res) => {
     // Provider Streaming URLs (Embed & Direct sources)
     const streamSources = [];
 
-    // VidSrc Provider
+    // VidSrc VIP (Primary)
     const vidsrcUrl =
       mediaType === 'tv'
         ? `https://vidsrc.to/embed/tv/${resolvedId}/${season}/${episode}`
         : `https://vidsrc.to/embed/movie/${resolvedId}`;
     streamSources.push({
-      provider: 'VidSrc (Primary HD)',
+      id: 'vidsrc',
+      provider: 'VidSrc VIP (Primary)',
       type: 'embed',
       url: vidsrcUrl,
       quality: '1080p',
       isDefault: true
     });
 
-    // MultiEmbed Provider (Multi-source backup)
-    const multiEmbedUrl =
-      mediaType === 'tv'
-        ? `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1&s=${season}&e=${episode}`
-        : `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1`;
-    streamSources.push({
-      provider: 'MultiEmbed FastStream',
-      type: 'embed',
-      url: multiEmbedUrl,
-      quality: '1080p'
-    });
-
-    // AutoEmbed Provider
+    // AutoEmbed (Backup 1)
     const autoEmbedUrl =
       mediaType === 'tv'
         ? `https://player.autoembed.cc/embed/tv/${resolvedId}/${season}/${episode}`
         : `https://player.autoembed.cc/embed/movie/${resolvedId}`;
     streamSources.push({
-      provider: 'AutoEmbed CDN',
+      id: 'autoembed',
+      provider: 'AutoEmbed (Backup 1)',
       type: 'embed',
       url: autoEmbedUrl,
-      quality: 'Auto'
+      quality: '1080p'
     });
 
-    // 2Embed Provider
+    // SuperEmbed (Backup 2)
+    const superEmbedUrl =
+      mediaType === 'tv'
+        ? `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1&s=${season}&e=${episode}`
+        : `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1`;
+    streamSources.push({
+      id: 'superembed',
+      provider: 'SuperEmbed (Backup 2)',
+      type: 'embed',
+      url: superEmbedUrl,
+      quality: '1080p'
+    });
+
+    // 2Embed (Backup 3)
     const twoEmbedUrl =
       mediaType === 'tv'
         ? `https://www.2embed.cc/embedtv/${resolvedId}&s=${season}&e=${episode}`
         : `https://www.2embed.cc/embed/${resolvedId}`;
     streamSources.push({
-      provider: '2Embed Server',
+      id: '2embed',
+      provider: '2Embed (Backup 3)',
       type: 'embed',
       url: twoEmbedUrl,
       quality: '720p'

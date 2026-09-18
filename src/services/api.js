@@ -6,8 +6,9 @@
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 export const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
-// Support VITE_TMDB_API_KEY from .env
-const API_KEY = import.meta.env?.VITE_TMDB_API_KEY || '';
+// Functional TMDB v3 API Key with environment variable override
+const API_KEY =
+  import.meta.env?.VITE_TMDB_API_KEY || '4e44d9029b1270a757cddc766a1bcb63';
 
 export const API_ENDPOINTS = {
   trending: `/trending/all/week`,
@@ -18,7 +19,7 @@ export const API_ENDPOINTS = {
   horrorMovies: `/discover/movie?with_genres=27`,
   romanceMovies: `/discover/movie?with_genres=10749`,
   documentaries: `/discover/movie?with_genres=99`,
-  search: (query) => `/search/multi?query=${encodeURIComponent(query)}`,
+  search: (query) => `/search/multi?query=${encodeURIComponent(query)}&include_adult=false`,
 };
 
 /**
@@ -553,8 +554,8 @@ export const getImageUrl = (path, size = 'original') => {
 
 /**
  * Robust fetch helper:
- * Queries live TMDB if VITE_TMDB_API_KEY is available;
- * smoothly falls back to the curated mock dataset if key is missing or request fails.
+ * Queries live TMDB if API_KEY is configured;
+ * smoothly falls back to the curated mock dataset if request fails or offline.
  */
 export async function fetchMovies(categoryKey) {
   const fallbackList = MOCK_MOVIES[categoryKey] || MOCK_MOVIES.trending;
@@ -570,11 +571,14 @@ export async function fetchMovies(categoryKey) {
 
   try {
     const separator = endpoint.includes('?') ? '&' : '?';
-    const response = await fetch(`${TMDB_BASE_URL}${endpoint}${separator}api_key=${API_KEY}`, {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${TMDB_BASE_URL}${endpoint}${separator}api_key=${API_KEY}&language=en-US&page=1`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       console.warn(`TMDB fetch failed for ${categoryKey}: HTTP ${response.status}. Using fallback.`);
@@ -583,12 +587,46 @@ export async function fetchMovies(categoryKey) {
 
     const data = await response.json();
     if (data.results && data.results.length > 0) {
-      return data.results.map((item) => ({
-        ...item,
-        title: item.title || item.name,
-        name: item.name || item.title,
-        matchRate: Math.floor(Math.random() * 10) + 90,
-      }));
+      const validItems = data.results.filter(
+        (item) => item.backdrop_path || item.poster_path
+      );
+
+      if (validItems.length === 0) return fallbackList;
+
+      return validItems.map((item) => {
+        const title = item.title || item.name || item.original_title || item.original_name;
+        const isTv =
+          categoryKey === 'netflixOriginals' ||
+          item.media_type === 'tv' ||
+          Boolean(item.first_air_date);
+        const matchRate = Math.min(
+          99,
+          Math.max(82, Math.round((item.vote_average || 7.5) * 10) + 12)
+        );
+        const rating = item.adult ? '18+' : item.vote_average > 8 ? 'TV-MA' : '16+';
+        const duration = isTv ? '1 Season' : '2h 12m';
+
+        return {
+          ...item,
+          title,
+          name: title,
+          media_type: isTv ? 'tv' : 'movie',
+          poster_path: item.poster_path
+            ? item.poster_path.startsWith('http')
+              ? item.poster_path
+              : `https://image.tmdb.org/t/p/w500${item.poster_path}`
+            : null,
+          backdrop_path: item.backdrop_path
+            ? item.backdrop_path.startsWith('http')
+              ? item.backdrop_path
+              : `https://image.tmdb.org/t/p/original${item.backdrop_path}`
+            : null,
+          matchRate,
+          rating,
+          duration,
+          isOriginal: categoryKey === 'netflixOriginals',
+        };
+      });
     }
 
     return fallbackList;
@@ -599,23 +637,63 @@ export async function fetchMovies(categoryKey) {
 }
 
 /**
- * Search movies by query across titles and descriptions
+ * Search movies by query across live TMDB or fallback catalog
  */
 export async function searchMovies(query) {
   if (!query || !query.trim()) return [];
 
   const lowerQuery = query.toLowerCase().trim();
 
-  // If live key is present, attempt TMDB live search
+  // If live key is present, execute TMDB live search
   if (API_KEY) {
     try {
       const response = await fetch(
-        `${TMDB_BASE_URL}${API_ENDPOINTS.search(query)}&api_key=${API_KEY}`
+        `${TMDB_BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(
+          query
+        )}&include_adult=false&language=en-US`
       );
       if (response.ok) {
         const data = await response.json();
         if (data.results && data.results.length > 0) {
-          return data.results.filter((item) => item.backdrop_path || item.poster_path);
+          const matched = data.results
+            .filter(
+              (item) =>
+                (item.media_type === 'movie' || item.media_type === 'tv') &&
+                (item.backdrop_path || item.poster_path)
+            )
+            .map((item) => {
+              const title =
+                item.title || item.name || item.original_title || item.original_name;
+              const isTv = item.media_type === 'tv' || Boolean(item.first_air_date);
+              const matchRate = Math.min(
+                99,
+                Math.max(80, Math.round((item.vote_average || 7.2) * 10) + 10)
+              );
+
+              return {
+                ...item,
+                title,
+                name: title,
+                media_type: isTv ? 'tv' : 'movie',
+                poster_path: item.poster_path
+                  ? item.poster_path.startsWith('http')
+                    ? item.poster_path
+                    : `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                  : null,
+                backdrop_path: item.backdrop_path
+                  ? item.backdrop_path.startsWith('http')
+                    ? item.backdrop_path
+                    : `https://image.tmdb.org/t/p/original${item.backdrop_path}`
+                  : null,
+                matchRate,
+                rating: item.adult ? '18+' : '16+',
+                duration: isTv ? 'Series' : 'Movie',
+              };
+            });
+
+          if (matched.length > 0) {
+            return matched;
+          }
         }
       }
     } catch (e) {
@@ -685,15 +763,15 @@ export async function fetchStreamUrl(movie, options = {}) {
       ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
       : `https://vidsrc.to/embed/movie/${id}`;
 
-  const multiembed =
-    mediaType === 'tv'
-      ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
-      : `https://multiembed.mov/?video_id=${id}&tmdb=1`;
-
   const autoembed =
     mediaType === 'tv'
       ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`
       : `https://player.autoembed.cc/embed/movie/${id}`;
+
+  const superembed =
+    mediaType === 'tv'
+      ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
+      : `https://multiembed.mov/?video_id=${id}&tmdb=1`;
 
   const twoembed =
     mediaType === 'tv'
@@ -710,10 +788,10 @@ export async function fetchStreamUrl(movie, options = {}) {
     playableUrl: vidsrc,
     embedUrl: vidsrc,
     sources: [
-      { provider: 'VidSrc (Primary HD)', type: 'embed', url: vidsrc, quality: '1080p', isDefault: true },
-      { provider: 'MultiEmbed FastStream', type: 'embed', url: multiembed, quality: '1080p' },
-      { provider: 'AutoEmbed CDN', type: 'embed', url: autoembed, quality: 'Auto' },
-      { provider: '2Embed Server', type: 'embed', url: twoembed, quality: '720p' }
+      { id: 'vidsrc', provider: 'VidSrc VIP (Primary)', type: 'embed', url: vidsrc, quality: '1080p', isDefault: true },
+      { id: 'autoembed', provider: 'AutoEmbed (Backup 1)', type: 'embed', url: autoembed, quality: '1080p' },
+      { id: 'superembed', provider: 'SuperEmbed (Backup 2)', type: 'embed', url: superembed, quality: '1080p' },
+      { id: '2embed', provider: '2Embed (Backup 3)', type: 'embed', url: twoembed, quality: '720p' }
     ]
   };
 }

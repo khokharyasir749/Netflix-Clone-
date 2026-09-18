@@ -81,7 +81,7 @@ export default function Row({ title, fetchCategory, isLargeRow = false }) {
         <div
           ref={rowRef}
           onScroll={updateScrollButtons}
-          className="flex items-center gap-2 sm:gap-3 px-4 md:px-12 overflow-x-auto overflow-y-visible py-8 -my-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+          className="flex items-start gap-2 sm:gap-3 px-4 md:px-12 overflow-x-auto overflow-y-visible py-8 -my-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
         >
           {movies.map((movie) => (
             <MovieCard

@@ -3,7 +3,7 @@ import { Play, Plus, Check, ThumbsUp, ChevronDown } from 'lucide-react';
 import { getImageUrl, DEFAULT_FALLBACK_IMAGE } from '../services/api';
 import { useMovieContext } from '../context/MovieContext';
 
-export default function MovieCard({ movie, isLargeRow = false }) {
+export default function MovieCard({ movie, isLargeRow = false, isGrid = false }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const {
@@ -17,7 +17,7 @@ export default function MovieCard({ movie, isLargeRow = false }) {
   if (!movie) return null;
 
   const inList = isInWatchlist(movie.id);
-  const title = movie.title || movie.name;
+  const title = movie.title || movie.name || 'Untitled';
 
   // Use poster for large rows (Netflix Originals), backdrop for standard rows
   const imagePath = isLargeRow
@@ -27,26 +27,29 @@ export default function MovieCard({ movie, isLargeRow = false }) {
   const imageUrl = getImageUrl(imagePath, 'w500');
 
   // Compute genre tags based on properties
-  const genres = movie.media_type === 'tv'
-    ? ['Suspenseful', 'Mind-Bending', 'Drama']
-    : ['Action', 'Thriller', 'Blockbuster'];
+  const genres =
+    movie.media_type === 'tv'
+      ? ['Suspenseful', 'Mind-Bending', 'Drama']
+      : ['Action', 'Thriller', 'Blockbuster'];
 
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => openDetailModal(movie)}
-      className={`relative shrink-0 select-none cursor-pointer transition-all duration-300 ${
-        isLargeRow
+      className={`group relative shrink-0 select-none cursor-pointer transition-all duration-300 flex flex-col ${
+        isGrid
+          ? 'w-full'
+          : isLargeRow
           ? 'w-[140px] sm:w-[170px] md:w-[200px]'
           : 'w-[200px] sm:w-[250px] md:w-[280px]'
       } ${isHovered ? 'z-50' : 'z-10'}`}
     >
-      {/* Floating Card: Scales strictly for the individually hovered card */}
+      {/* Thumbnail Container: Scales smoothly on hover */}
       <div
         className={`relative w-full rounded-md overflow-hidden bg-[#181818] transition-all duration-300 ease-out origin-center ${
           isHovered
-            ? 'scale-125 z-50 shadow-2xl ring-1 ring-white/20'
+            ? 'scale-105 sm:scale-110 z-50 shadow-2xl ring-1 ring-white/20'
             : 'scale-100 shadow-md border-0'
         } ${isLargeRow ? 'aspect-[2/3]' : 'aspect-[16/9]'}`}
       >
@@ -105,10 +108,10 @@ export default function MovieCard({ movie, isLargeRow = false }) {
                     e.stopPropagation();
                     playMovie(movie);
                   }}
-                  className="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/80 active:scale-95 transition-all shadow cursor-pointer"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/80 active:scale-95 transition-all shadow cursor-pointer"
                   title="Play"
                 >
-                  <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+                  <Play className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-black ml-0.5" />
                 </button>
 
                 {/* Add / Remove from My List */}
@@ -121,14 +124,18 @@ export default function MovieCard({ movie, isLargeRow = false }) {
                       addToWatchlist(movie);
                     }
                   }}
-                  className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
                     inList
                       ? 'bg-[#E50914] border-[#E50914] text-white'
                       : 'border-gray-400/80 bg-neutral-800/80 hover:border-white text-white'
                   }`}
                   title={inList ? 'Remove from My List' : 'Add to My List'}
                 >
-                  {inList ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  {inList ? (
+                    <Check className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                  ) : (
+                    <Plus className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                  )}
                 </button>
 
                 {/* Thumbs Up Like */}
@@ -137,14 +144,14 @@ export default function MovieCard({ movie, isLargeRow = false }) {
                     e.stopPropagation();
                     setIsLiked(!isLiked);
                   }}
-                  className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
                     isLiked
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-gray-400/80 bg-neutral-800/80 hover:border-white text-white'
                   }`}
                   title={isLiked ? 'Liked' : 'Rate this'}
                 >
-                  <ThumbsUp className="w-3.5 h-3.5" />
+                  <ThumbsUp className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                 </button>
               </div>
 
@@ -154,10 +161,10 @@ export default function MovieCard({ movie, isLargeRow = false }) {
                   e.stopPropagation();
                   openDetailModal(movie);
                 }}
-                className="w-7 h-7 rounded-full border border-gray-400/80 bg-neutral-800/80 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-gray-400/80 bg-neutral-800/80 hover:border-white text-white flex items-center justify-center transition-colors cursor-pointer"
                 title="More info"
               >
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
               </button>
             </div>
 
@@ -184,6 +191,21 @@ export default function MovieCard({ movie, isLargeRow = false }) {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Permanent Movie Title Under Card */}
+      <div className="mt-2 px-1">
+        <h3 className="text-sm font-semibold text-white tracking-wide truncate group-hover:text-red-500 transition-colors">
+          {movie?.title || movie?.name || 'Untitled'}
+        </h3>
+        <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
+          <span>
+            {movie?.release_date?.substring(0, 4) || movie?.first_air_date?.substring(0, 4) || '2024'}
+          </span>
+          <span className="border border-gray-600 px-1 py-0.2 rounded text-[10px] text-gray-300">
+            HD
+          </span>
         </div>
       </div>
     </div>
