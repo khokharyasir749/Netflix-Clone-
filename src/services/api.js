@@ -650,6 +650,74 @@ export async function searchMovies(query) {
   });
 }
 
+const BACKEND_URL = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:5000';
+
+/**
+ * Fetch playable streaming embed sources and URLs from Express backend.
+ * Returns primary embed stream URL and list of alternative providers.
+ */
+export async function fetchStreamUrl(movie, options = {}) {
+  if (!movie) return null;
+
+  const id = movie.id || movie.title;
+  const isTv = movie.media_type === 'tv' || Boolean(movie.first_air_date);
+  const mediaType = isTv ? 'tv' : (movie.media_type || 'movie');
+  const season = options.season || 1;
+  const episode = options.episode || 1;
+  const movieTitle = movie.title || movie.name || '';
+
+  try {
+    const url = `${BACKEND_URL}/api/stream/${encodeURIComponent(id)}?type=${mediaType}&season=${season}&episode=${episode}&title=${encodeURIComponent(movieTitle)}`;
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.success && data.playableUrl) {
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn('Backend stream API unavailable, utilizing direct high-reliability stream providers:', err);
+  }
+
+  // Client-side fallback if backend is unreachable
+  const vidsrc =
+    mediaType === 'tv'
+      ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
+      : `https://vidsrc.to/embed/movie/${id}`;
+
+  const multiembed =
+    mediaType === 'tv'
+      ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
+      : `https://multiembed.mov/?video_id=${id}&tmdb=1`;
+
+  const autoembed =
+    mediaType === 'tv'
+      ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`
+      : `https://player.autoembed.cc/embed/movie/${id}`;
+
+  const twoembed =
+    mediaType === 'tv'
+      ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
+      : `https://www.2embed.cc/embed/${id}`;
+
+  return {
+    success: true,
+    id: id,
+    title: movieTitle,
+    mediaType: mediaType,
+    season: mediaType === 'tv' ? season : undefined,
+    episode: mediaType === 'tv' ? episode : undefined,
+    playableUrl: vidsrc,
+    embedUrl: vidsrc,
+    sources: [
+      { provider: 'VidSrc (Primary HD)', type: 'embed', url: vidsrc, quality: '1080p', isDefault: true },
+      { provider: 'MultiEmbed FastStream', type: 'embed', url: multiembed, quality: '1080p' },
+      { provider: 'AutoEmbed CDN', type: 'embed', url: autoembed, quality: 'Auto' },
+      { provider: '2Embed Server', type: 'embed', url: twoembed, quality: '720p' }
+    ]
+  };
+}
+
 export default {
   API_ENDPOINTS,
   MOCK_MOVIES,
@@ -657,4 +725,6 @@ export default {
   getImageUrl,
   fetchMovies,
   searchMovies,
+  fetchStreamUrl,
 };
+
