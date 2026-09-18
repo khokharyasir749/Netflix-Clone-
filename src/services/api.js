@@ -758,25 +758,25 @@ export async function fetchStreamUrl(movie, options = {}) {
   }
 
   // Client-side fallback if backend is unreachable
-  const vidsrc =
+  const vidlink =
     mediaType === 'tv'
-      ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
-      : `https://vidsrc.to/embed/movie/${id}`;
+      ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
+      : `https://vidlink.pro/movie/${id}`;
 
-  const autoembed =
+  const vidsrcCc =
     mediaType === 'tv'
-      ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`
-      : `https://player.autoembed.cc/embed/movie/${id}`;
+      ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
+      : `https://vidsrc.cc/v2/embed/movie/${id}`;
+
+  const smashy =
+    mediaType === 'tv'
+      ? `https://player.smashy.stream/tv/${id}?s=${season}&e=${episode}`
+      : `https://player.smashy.stream/movie/${id}`;
 
   const superembed =
     mediaType === 'tv'
       ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
       : `https://multiembed.mov/?video_id=${id}&tmdb=1`;
-
-  const twoembed =
-    mediaType === 'tv'
-      ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
-      : `https://www.2embed.cc/embed/${id}`;
 
   return {
     success: true,
@@ -785,13 +785,13 @@ export async function fetchStreamUrl(movie, options = {}) {
     mediaType: mediaType,
     season: mediaType === 'tv' ? season : undefined,
     episode: mediaType === 'tv' ? episode : undefined,
-    playableUrl: vidsrc,
-    embedUrl: vidsrc,
+    playableUrl: vidlink,
+    embedUrl: vidlink,
     sources: [
-      { id: 'vidsrc', provider: 'VidSrc VIP (Primary)', type: 'embed', url: vidsrc, quality: '1080p', isDefault: true },
-      { id: 'autoembed', provider: 'AutoEmbed (Backup 1)', type: 'embed', url: autoembed, quality: '1080p' },
-      { id: 'superembed', provider: 'SuperEmbed (Backup 2)', type: 'embed', url: superembed, quality: '1080p' },
-      { id: '2embed', provider: '2Embed (Backup 3)', type: 'embed', url: twoembed, quality: '720p' }
+      { id: 'vidlink', provider: 'Server 1 (VidLink Pro)', type: 'embed', url: vidlink, quality: '1080p', isDefault: true },
+      { id: 'vidsrc_cc', provider: 'Server 2 (VidSrc CC)', type: 'embed', url: vidsrcCc, quality: '1080p' },
+      { id: 'smashystream', provider: 'Server 3 (SmashyStream)', type: 'embed', url: smashy, quality: '1080p' },
+      { id: 'superembed', provider: 'Server 4 (SuperEmbed Direct)', type: 'embed', url: superembed, quality: '1080p' }
     ]
   };
 }

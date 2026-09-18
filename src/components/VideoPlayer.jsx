@@ -56,39 +56,39 @@ function getFallbackEpisodes(showTitle, seasonNum) {
 // 4 Top Reliable Stream Engines
 const STREAM_ENGINES = [
   {
-    id: 'vidsrc',
-    name: 'VidSrc VIP',
-    badge: 'Primary 1080p',
+    id: 'vidlink',
+    name: 'Server 1 (VidLink Pro)',
+    badge: 'High Speed & Auto',
     isPrimary: true,
     getUrl: (id, isTv, season, episode) =>
       isTv
-        ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${id}`,
+        ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
+        : `https://vidlink.pro/movie/${id}`,
   },
   {
-    id: 'autoembed',
-    name: 'AutoEmbed',
-    badge: 'Backup 1',
+    id: 'vidsrc_cc',
+    name: 'Server 2 (VidSrc CC)',
+    badge: 'IN Mirror',
     getUrl: (id, isTv, season, episode) =>
       isTv
-        ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`
-        : `https://player.autoembed.cc/embed/movie/${id}`,
+        ? `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`
+        : `https://vidsrc.cc/v2/embed/movie/${id}`,
+  },
+  {
+    id: 'smashystream',
+    name: 'Server 3 (SmashyStream)',
+    badge: 'Fast Backup',
+    getUrl: (id, isTv, season, episode) =>
+      isTv
+        ? `https://player.smashy.stream/tv/${id}?s=${season}&e=${episode}`
+        : `https://player.smashy.stream/movie/${id}`,
   },
   {
     id: 'superembed',
-    name: 'SuperEmbed',
-    badge: 'Backup 2',
+    name: 'Server 4 (SuperEmbed Direct)',
+    badge: 'Direct Mirror',
     getUrl: (id, isTv, season, episode) =>
       `https://multiembed.mov/?video_id=${id}&tmdb=1${isTv ? `&s=${season}&e=${episode}` : ''}`,
-  },
-  {
-    id: '2embed',
-    name: '2Embed',
-    badge: 'Backup 3',
-    getUrl: (id, isTv, season, episode) =>
-      isTv
-        ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
-        : `https://www.2embed.cc/embed/${id}`,
   },
 ];
 
@@ -96,7 +96,7 @@ export default function VideoPlayer() {
   const { playingMovie, closePlayer } = useMovieContext();
 
   // Engine selection & mode
-  const [selectedEngineId, setSelectedEngineId] = useState('vidsrc');
+  const [selectedEngineId, setSelectedEngineId] = useState('vidlink');
   const [isTrailerMode, setIsTrailerMode] = useState(false);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
@@ -135,7 +135,7 @@ export default function VideoPlayer() {
       prevMovieIdRef.current = playingMovie.id;
       setSeason(1);
       setEpisode(1);
-      setSelectedEngineId('vidsrc');
+      setSelectedEngineId('vidlink');
       setIsTrailerMode(false);
       setIsServerMenuOpen(false);
       setIsEpisodesDrawerOpen(false);
@@ -245,6 +245,12 @@ export default function VideoPlayer() {
   const activeStreamUrl = isTrailerMode
     ? trailerEmbedUrl
     : activeEngine.getUrl(movieId, isTv, season, episode);
+
+  const switchEngine = useCallback((engineId) => {
+    setSelectedEngineId(engineId);
+    setIsTrailerMode(false);
+    setIsServerMenuOpen(false);
+  }, []);
 
   // Auto-hide controls overlay after 3.5s of mouse inactivity
   const handleMouseMove = useCallback(() => {
@@ -381,7 +387,7 @@ export default function VideoPlayer() {
               aria-label="Switch Streaming Server"
             >
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="hidden xs:inline sm:inline max-w-[110px] truncate">
+              <span className="hidden xs:inline sm:inline max-w-[150px] truncate">
                 {isTrailerMode ? 'Official Trailer' : activeEngine.name}
               </span>
               <ChevronDown
@@ -408,11 +414,7 @@ export default function VideoPlayer() {
                     return (
                       <button
                         key={engine.id}
-                        onClick={() => {
-                          setSelectedEngineId(engine.id);
-                          setIsTrailerMode(false);
-                          setIsServerMenuOpen(false);
-                        }}
+                        onClick={() => switchEngine(engine.id)}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors cursor-pointer text-left ${
                           isSelected
                             ? 'bg-[#E50914] text-white font-bold shadow-md'

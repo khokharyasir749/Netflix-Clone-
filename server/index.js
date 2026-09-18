@@ -258,57 +258,57 @@ app.get('/api/stream/:id', async (req, res) => {
     // Provider Streaming URLs (Embed & Direct sources)
     const streamSources = [];
 
-    // VidSrc VIP (Primary)
-    const vidsrcUrl =
+    // Server 1 (VidLink Pro - High Speed & Auto)
+    const vidlinkUrl =
       mediaType === 'tv'
-        ? `https://vidsrc.to/embed/tv/${resolvedId}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${resolvedId}`;
+        ? `https://vidlink.pro/tv/${resolvedId}/${season}/${episode}`
+        : `https://vidlink.pro/movie/${resolvedId}`;
     streamSources.push({
-      id: 'vidsrc',
-      provider: 'VidSrc VIP (Primary)',
+      id: 'vidlink',
+      provider: 'Server 1 (VidLink Pro)',
       type: 'embed',
-      url: vidsrcUrl,
+      url: vidlinkUrl,
       quality: '1080p',
       isDefault: true
     });
 
-    // AutoEmbed (Backup 1)
-    const autoEmbedUrl =
+    // Server 2 (VidSrc CC / IN Mirror)
+    const vidsrcCcUrl =
       mediaType === 'tv'
-        ? `https://player.autoembed.cc/embed/tv/${resolvedId}/${season}/${episode}`
-        : `https://player.autoembed.cc/embed/movie/${resolvedId}`;
+        ? `https://vidsrc.cc/v2/embed/tv/${resolvedId}/${season}/${episode}`
+        : `https://vidsrc.cc/v2/embed/movie/${resolvedId}`;
     streamSources.push({
-      id: 'autoembed',
-      provider: 'AutoEmbed (Backup 1)',
+      id: 'vidsrc_cc',
+      provider: 'Server 2 (VidSrc CC)',
       type: 'embed',
-      url: autoEmbedUrl,
+      url: vidsrcCcUrl,
       quality: '1080p'
     });
 
-    // SuperEmbed (Backup 2)
+    // Server 3 (SmashyStream)
+    const smashyUrl =
+      mediaType === 'tv'
+        ? `https://player.smashy.stream/tv/${resolvedId}?s=${season}&e=${episode}`
+        : `https://player.smashy.stream/movie/${resolvedId}`;
+    streamSources.push({
+      id: 'smashystream',
+      provider: 'Server 3 (SmashyStream)',
+      type: 'embed',
+      url: smashyUrl,
+      quality: '1080p'
+    });
+
+    // Server 4 (SuperEmbed Direct)
     const superEmbedUrl =
       mediaType === 'tv'
         ? `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1&s=${season}&e=${episode}`
         : `https://multiembed.mov/?video_id=${resolvedId}&tmdb=1`;
     streamSources.push({
       id: 'superembed',
-      provider: 'SuperEmbed (Backup 2)',
+      provider: 'Server 4 (SuperEmbed Direct)',
       type: 'embed',
       url: superEmbedUrl,
       quality: '1080p'
-    });
-
-    // 2Embed (Backup 3)
-    const twoEmbedUrl =
-      mediaType === 'tv'
-        ? `https://www.2embed.cc/embedtv/${resolvedId}&s=${season}&e=${episode}`
-        : `https://www.2embed.cc/embed/${resolvedId}`;
-    streamSources.push({
-      id: '2embed',
-      provider: '2Embed (Backup 3)',
-      type: 'embed',
-      url: twoEmbedUrl,
-      quality: '720p'
     });
 
     // Official Trailer preview
