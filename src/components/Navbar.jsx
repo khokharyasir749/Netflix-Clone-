@@ -6,8 +6,6 @@ import {
   ChevronDown,
   Menu,
   X,
-  User,
-  Film,
   HelpCircle,
   Settings,
   LogOut,
@@ -17,7 +15,6 @@ import { useMovieContext } from '../context/MovieContext';
 
 export default function Navbar() {
   const {
-    user,
     logout,
     profiles,
     activeProfile,
@@ -120,18 +117,16 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'TV Shows', path: '/?filter=tv' },
-    { name: 'Movies', path: '/?filter=movies' },
-    { name: 'New & Popular', path: '/?filter=popular' },
+    { name: 'TV Shows', path: '/tv-shows' },
+    { name: 'Movies', path: '/movies' },
+    { name: 'New & Popular', path: '/new-popular' },
     { name: 'My List', path: '/my-list' },
   ];
 
   const isActiveLink = (path) => {
     if (path === '/') {
-      return location.pathname === '/' && !location.search;
-    }
-    if (path.startsWith('/?filter=')) {
-      return location.pathname === '/' && location.search === path.replace('/', '');
+      // Home is active only when on '/' with no relevant path segment
+      return location.pathname === '/';
     }
     return location.pathname === path;
   };
@@ -197,10 +192,10 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className={`transition-colors duration-200 ${
+                    className={`transition-colors duration-200 whitespace-nowrap ${
                       active
                         ? 'text-white font-bold'
-                        : 'text-gray-300 hover:text-gray-400'
+                        : 'text-gray-300 hover:text-white font-normal'
                     }`}
                   >
                     {link.name}

@@ -57,6 +57,31 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          {/* Category-filtered Home views via dedicated clean URLs */}
+          <Route
+            path="/tv-shows"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/movies"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/new-popular"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/my-list"
             element={
